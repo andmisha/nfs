@@ -275,3 +275,67 @@ total 0
 -rw-r--r--. 1 root      root      0 Jan 24 19:53 test_file.txt
 [root@nfss ~]#
 ```
+#### 31) Провел финальную проверку, выполнив перезагрузку клиента и проверив автоматическое монтирование директории с NFS-сервера - все работает:
+```
+[root@nfsc upload]# reboot
+Connection to 127.0.0.1 closed by remote host.
+Connection to 127.0.0.1 closed.
+PS C:\OTUS\nfs> vagrant ssh nfsc
+Last login: Mon Jan 24 19:15:33 2022 from 10.0.2.2
+[vagrant@nfsc ~]$ uptime
+ 20:02:08 up 0 min,  1 user,  load average: 2.24, 0.70, 0.24
+[vagrant@nfsc ~]$ mount | grep NFS
+systemd-1 on /mnt/NFS_share type autofs (rw,relatime,fd=33,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=11300)
+[vagrant@nfsc ~]$ ls -l /mnt/NFS_share/upload/
+total 0
+-rw-r--r--. 1 nfsnobody nfsnobody 0 Jan 24 19:56 test_file_client.txt
+-rw-r--r--. 1 root      root      0 Jan 24 19:53 test_file.txt
+[vagrant@nfsc ~]$
+```
+#### 32) Провел аналогичную финальную проверку, выполнив перезагрузку сервера и проверив автоматический запуск демона NFS и Firewall, затем содержимое файла /etc/exportfs и работу RPC - все работает:
+```
+[root@nfss ~]# reboot
+Connection to 127.0.0.1 closed by remote host.
+Connection to 127.0.0.1 closed.
+PS C:\OTUS\nfs> vagrant ssh nfss
+Last login: Mon Jan 24 20:07:18 2022 from 10.0.2.2
+[vagrant@nfss ~]$ uptime
+ 20:33:59 up 5 min,  1 user,  load average: 0.02, 0.28, 0.19
+[vagrant@nfss ~]$ sudo -i
+[root@nfss ~]# ls -l /srv/NFS_share/upload/
+total 0
+-rw-r--r--. 1 nfsnobody nfsnobody 0 Jan 24 19:56 test_file_client.txt
+-rw-r--r--. 1 root      root      0 Jan 24 19:53 test_file.txt
+[root@nfss ~]# systemctl status nfs
+● nfs-server.service - NFS server and services
+   Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; enabled; vendor preset: disabled)
+  Drop-In: /run/systemd/generator/nfs-server.service.d
+           └─order-with-mounts.conf
+   Active: active (exited) since Mon 2022-01-24 20:29:13 UTC; 5min ago
+  Process: 781 ExecStartPost=/bin/sh -c if systemctl -q is-active gssproxy; then systemctl reload gssproxy ; fi (code=exited, status=0/SUCCESS)
+  Process: 760 ExecStart=/usr/sbin/rpc.nfsd $RPCNFSDARGS (code=exited, status=0/SUCCESS)
+  Process: 755 ExecStartPre=/usr/sbin/exportfs -r (code=exited, status=0/SUCCESS)
+ Main PID: 760 (code=exited, status=0/SUCCESS)
+   CGroup: /system.slice/nfs-server.service
+
+Jan 24 20:29:13 nfss systemd[1]: Starting NFS server and services...
+Jan 24 20:29:13 nfss systemd[1]: Started NFS server and services.
+[root@nfss ~]# systemctl status firewalld
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2022-01-24 20:29:08 UTC; 5min ago
+     Docs: man:firewalld(1)
+ Main PID: 373 (firewalld)
+   CGroup: /system.slice/firewalld.service
+           └─373 /usr/bin/python2 -Es /usr/sbin/firewalld --nofork --nopid
+
+Jan 24 20:28:17 nfss systemd[1]: Starting firewalld - dynamic firewall daemon...
+Jan 24 20:29:08 nfss systemd[1]: Started firewalld - dynamic firewall daemon.
+Jan 24 20:29:08 nfss firewalld[373]: WARNING: AllowZoneDrifting is enabled. This is considered an insecure configuration option. It will be removed in a future release. Please consider disabling it now.
+[root@nfss ~]# exportfs -s
+/srv/NFS_share  192.168.50.11/32(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,no_all_squash)
+[root@nfss ~]# showmount -a 192.168.50.10
+All mount points on 192.168.50.10:
+192.168.50.11:/srv/NFS_share
+[root@nfss ~]#
+```
