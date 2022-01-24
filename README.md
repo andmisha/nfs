@@ -144,4 +144,44 @@ success
 [root@nfss ~]# systemctl enable nfs --now
 Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.
 ```
-#### 13) Включил демона NFS на ВМ nfss (NFS-сервер)
+#### 13) Проверил порты 2049/udp, 2049/tcp, 20048/udp, 20048/tcp, 111/udp, 111/tcp - все порты слушаются
+```
+[root@nfss ~]# ss -tnplu | grep 2049
+udp    UNCONN     0      0         *:2049                  *:*
+udp    UNCONN     0      0      [::]:2049               [::]:*
+tcp    LISTEN     0      64        *:2049                  *:*
+tcp    LISTEN     0      64     [::]:2049               [::]:*
+[root@nfss ~]# ss -tnplu | grep 20048
+udp    UNCONN     0      0         *:20048                 *:*                   users:(("rpc.mountd",pid=3370,fd=7))
+udp    UNCONN     0      0      [::]:20048              [::]:*                   users:(("rpc.mountd",pid=3370,fd=9))
+tcp    LISTEN     0      128       *:20048                 *:*                   users:(("rpc.mountd",pid=3370,fd=8))
+tcp    LISTEN     0      128    [::]:20048              [::]:*                   users:(("rpc.mountd",pid=3370,fd=10))
+[root@nfss ~]# ss -tnplu | grep 111
+udp    UNCONN     0      0         *:111                   *:*                   users:(("rpcbind",pid=338,fd=6))
+udp    UNCONN     0      0      [::]:111                [::]:*                   users:(("rpcbind",pid=338,fd=9))
+tcp    LISTEN     0      128       *:111                   *:*                   users:(("rpcbind",pid=338,fd=8))
+tcp    LISTEN     0      128    [::]:111                [::]:*                   users:(("rpcbind",pid=338,fd=11))
+```
+#### 13) Создал директорию по пути /srv/NFS_share/upload
+```
+[root@nfss ~]# mkdir -p /srv/NFS_share/upload
+```
+#### 14) Настроил владельца созданной директории 
+```
+[root@nfss ~]# chown -R nfsnobody:nfsnobody /srv/NFS_share/
+```
+#### 15) Настроил права 0777 (чтение\запись\запуск для всех) для созданной директории 
+```
+[root@nfss ~]# chmod 0777 /srv/NFS_share/upload/
+```
+#### 16) Проверил наличие файла /etc/exports 
+```
+[root@nfss ~]# ls -l /etc | grep exports
+-rw-r--r--.  1 root root        0 Jun  7  2013 exports
+drwxr-xr-x.  2 root root        6 Oct 14 12:29 exports.d
+```
+#### 17) Создал запись в файле /etc/exports для экспорта директории. Добавил строку в файл /etc/exports при помощи редактора vi, затем проверил, что изменения сохранились 
+```
+[root@nfss ~]# cat /etc/exports
+/srv/share 192.168.50.11/32(rw,sync,root_squash)
+```
