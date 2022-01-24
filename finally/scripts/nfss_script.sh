@@ -6,9 +6,9 @@ yum install -y nfs-utils
 systemctl enable firewalld --now
 # Add NFS rule for Firewall
 firewall-cmd --add-service="nfs3" \
-> --add-service="rpc-bind" \
-> --add-service="mountd" \
-> --permanent
+--add-service="rpc-bind" \
+--add-service="mountd" \
+--permanent
 # Reload Firewall daemon configuration
 firewall-cmd --reload
 # Enable NFS daemon
