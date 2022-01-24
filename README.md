@@ -40,11 +40,11 @@ nfss                      running (virtualbox)
 nfsc                      running (virtualbox)
 ```
 
-### 5) Выполнил vagrant ssh nfss для подключения к ВМ nfss (NFS-сервер)
+#### 5) Выполнил vagrant ssh nfss для подключения к ВМ nfss (NFS-сервер)
 
-### 6) Выполнил sudo -i для авторизации пользователем root для продолжения дальнейших действий по настройке ВМ nfss (NFS-сервер)
+#### 6) Выполнил sudo -i для авторизации пользователем root для продолжения дальнейших действий по настройке ВМ nfss (NFS-сервер)
 
-### 7) Выполнил yum install nfs-utils для установки демона NFS-сервера и дополнительных утилит на ВМ nfss (NFS-сервер)
+#### 7) Выполнил yum install nfs-utils для установки демона NFS-сервера и дополнительных утилит на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# yum install nfs-utils
 Loaded plugins: fastestmirror
@@ -105,13 +105,13 @@ Updated:
 
 Complete!
 ```
-### 8) Выполнил включение демона Firewall на ВМ nfss (NFS-сервер)
+#### 8) Выполнил включение демона Firewall на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# systemctl enable firewalld --now
 Created symlink from /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service to /usr/lib/systemd/system/firewalld.service.
 Created symlink from /etc/systemd/system/multi-user.target.wants/firewalld.service to /usr/lib/systemd/system/firewalld.service.
 ```
-### 9) Проверил статус демона Firewall на ВМ nfss (NFS-сервер)
+#### 9) Проверил статус демона Firewall на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# systemctl status firewalld
 ● firewalld.service - firewalld - dynamic firewall daemon
@@ -126,7 +126,7 @@ Jan 24 18:53:34 nfss systemd[1]: Starting firewalld - dynamic firewall daemon...
 Jan 24 18:53:35 nfss systemd[1]: Started firewalld - dynamic firewall daemon.
 Jan 24 18:53:35 nfss firewalld[3208]: WARNING: AllowZoneDrifting is enabled. This is considered an insecure configuration option. It will be removed in a future release. Please consider disabling it now.
 ```
-### 10) Добавил Firewall правило для сервера NFS на ВМ nfss (NFS-сервер)
+#### 10) Добавил Firewall правило для сервера NFS на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# firewall-cmd --add-service="nfs3" \
 > --add-service="rpc-bind" \
@@ -134,14 +134,14 @@ Jan 24 18:53:35 nfss firewalld[3208]: WARNING: AllowZoneDrifting is enabled. Thi
 > --permanent
 success
 ```
-### 11) Перечитал конфигурацию Firewall для включения правила для сервера NFS на ВМ nfss (NFS-сервер)
+#### 11) Перечитал конфигурацию Firewall для включения правила для сервера NFS на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# firewall-cmd --reload
 success
 ```
-### 12) Включил демона NFS на ВМ nfss (NFS-сервер)
+#### 12) Включил демона NFS на ВМ nfss (NFS-сервер)
 ```
 [root@nfss ~]# systemctl enable nfs --now
 Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.
 ```
-### 13) Включил демона NFS на ВМ nfss (NFS-сервер)
+#### 13) Включил демона NFS на ВМ nfss (NFS-сервер)
